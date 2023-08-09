@@ -16,6 +16,9 @@ type item struct {
 }
 
 type List []item
+type Stringer interface {
+	String() string
+}
 
 func (l *List) Add(task string) {
 	t := item{
@@ -92,4 +95,32 @@ func (l *List) Get(filename string) error {
 		return nil
 	}
 	return json.Unmarshal(file, l)
+}
+
+func (l *List) String() string {
+	formatted := ""
+
+	for k, t := range *l {
+		prefix := " "
+		if t.Done {
+			prefix = "X"
+		}
+
+		formatted += fmt.Sprintf("%s %d: %s\n", prefix, k+1, t.Task)
+	}
+	return formatted
+}
+
+func (l List) PrintTodos() List {
+	ls := l
+	for i, v := range ls {
+		if v.Done {
+			if i < len(ls) {
+				ls = append(ls[:i], ls[i+1:]...)
+			} else {
+				ls = ls[:i-1]
+			}
+		}
+	}
+	return ls
 }
